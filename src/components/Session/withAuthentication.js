@@ -6,7 +6,7 @@ import { withFirebase } from "../Firebase";
 const withAuthentication = Component => {
   class WithAuthentication extends React.Component {
     state = {
-      authUser: null
+      authUser: JSON.parse(localStorage.getItem("authUser"))
     };
     //     ? this.setState({ authUser })
     //     : this.setState({ authUser: null });
@@ -36,10 +36,11 @@ const withAuthentication = Component => {
                 email: authUser.email,
                 ...dbUser
               };
-
+              localStorage.setItem("authUser", JSON.stringify(authUser));
               this.setState({ authUser });
             });
         } else {
+          localStorage.removeItem("authUser");
           this.setState({ authUser: null });
         }
       });
