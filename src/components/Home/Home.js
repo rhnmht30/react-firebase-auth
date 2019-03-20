@@ -10,5 +10,4 @@ const HomePage = () => (
 );
 
 const condition = authUser => !!authUser;
-
 export default withAuthorization(condition)(HomePage);

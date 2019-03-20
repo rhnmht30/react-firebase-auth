@@ -3,6 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
 import { compose } from "recompose";
+import * as ROLES from "../../constants/roles";
 
 const SignUpPage = () => (
   <div>
@@ -16,21 +17,27 @@ const INITIAL_STATE = {
   email: "",
   passwordOne: "",
   passwordTwo: "",
+  isAdmin: false,
   error: null
 };
 class SignUpFormBase extends Component {
   state = { ...INITIAL_STATE };
 
   onSubmit = event => {
-    const { username, email, passwordOne } = this.state;
+    const { username, email, passwordOne, isAdmin } = this.state;
+    const roles = [];
 
+    if (isAdmin) {
+      roles.push(ROLES.ADMIN);
+    }
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
       .then(authUser => {
         // Create a user in your Firebase realtime database
         return this.props.firebase.user(authUser.user.uid).set({
           username,
-          email
+          email,
+          roles
         });
       })
       .then(() => {
@@ -48,8 +55,19 @@ class SignUpFormBase extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
+  onChangeCheckbox = event => {
+    this.setState({ [event.target.name]: event.target.checked });
+  };
+
   render() {
-    const { username, email, passwordOne, passwordTwo, error } = this.state;
+    const {
+      username,
+      email,
+      passwordOne,
+      passwordTwo,
+      error,
+      isAdmin
+    } = this.state;
     const isInvalid =
       passwordOne !== passwordTwo ||
       passwordOne === "" ||
@@ -86,6 +104,15 @@ class SignUpFormBase extends Component {
           type="password"
           placeholder="Confirm Password"
         />
+        <label>
+          Admin:
+          <input
+            name="isAdmin"
+            type="checkbox"
+            checked={isAdmin}
+            onChange={this.onChangeCheckbox}
+          />
+        </label>
         <button disabled={isInvalid} type="submit">
           SIGN UP
         </button>
