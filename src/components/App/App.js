@@ -8,16 +8,32 @@ import PasswordForgetPage from "../PasswordForget/PasswordForget";
 import HomePage from "../Home/Home";
 import AccountPage from "../Account/Account";
 import AdminPage from "../Admin/Admin";
+import { withFirebase } from "../Firebase";
 
 import * as ROUTES from "../../constants/routes";
 
-export default class App extends Component {
+class App extends Component {
+  state = {
+    authUser: null
+  };
+
+  componentDidMount() {
+    this.props.firebase.auth.onAuthStateChanged(authUser => {
+      authUser
+        ? this.setState({ authUser })
+        : this.setState({ authUser: null });
+    });
+  }
+
+  componentWillUnmount() {
+    this.listener();
+  }
+
   render() {
     return (
       <Router>
-        <Navigation />
+        <Navigation authUser={this.state.authUser} />
         <hr />
-
         <Route exact path={ROUTES.LANDING} component={LandingPage} />
         <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
         <Route path={ROUTES.SIGN_IN} component={SignInPage} />
@@ -29,3 +45,5 @@ export default class App extends Component {
     );
   }
 }
+
+export default withFirebase(App);
